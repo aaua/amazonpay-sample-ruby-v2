@@ -20,7 +20,7 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 
-    
+
 </head>
 
 <body data-gr-c-s-loaded="true">
@@ -37,6 +37,26 @@
             <h1 class="my-4">ご注文手続き</h1>
 
             <div class="card mb-4" id="highlight1" data-toggle="tooltip1" data-container="body" data-placement="left" data-html="true" title="">
+                <div class="card-body">
+                  <h5>購入者</h5>
+                  <table class="table table-striped">
+                    <tbody>
+                    <tr>
+                      <td>購入者氏名</td>
+                      <td class="text-right"><%= buyer['name'] %></td>
+                    </tr>
+                    <tr>
+                      <td>購入者メールアドレス</td>
+                      <td class="text-right"><%= buyer['email'] %></td>
+                    </tr>
+                    <tr>
+                      <td>購入者電話番号</td>
+                      <td class="text-right"><%= buyer['phoneNumber'] %></td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+
                 <div class="card-body">
                     <h5>お届け先</h5>
                     <table class="table table-striped">
@@ -75,7 +95,7 @@
                     <div id="changeButton2" class="btn btn-outline-secondary btn-sm">変更</div>
                 </div>
             </div>
-    
+
             <div class="card mb-4">
                 <div class="card-body">
                     <h5 class="card-title">ご注文内容</h5>

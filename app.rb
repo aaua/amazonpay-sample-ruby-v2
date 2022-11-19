@@ -12,6 +12,8 @@ config = {
     sandbox: true
 }
 
+STDOUT.sync = true
+
 client = AmazonPayClient.new config
 
 get '/' do
@@ -23,7 +25,14 @@ get '/cart' do
         webCheckoutDetails: {
             checkoutReviewReturnUrl: 'http://localhost:4567/review'
         },
-        storeId: KeyInfo::STORE_ID
+        storeId: KeyInfo::STORE_ID,
+        chargePermissionType: 'Recurring',
+        "recurringMetadata": {
+          "frequency": {
+            "unit": "Variable",
+            "value": "0"
+          }
+        }
     })
     erb :cart, locals: {
         merchant_id: KeyInfo::MERCHANT_ID,
@@ -35,7 +44,13 @@ end
 
 get '/review' do
     # Get Checkout Session
+    puts "* review *****************"
+    puts params.inspect
     response = client.api_call("checkoutSessions/#{params['amazonCheckoutSessionId']}", 'GET')
+
+    puts "* review GET checkoutSessions *****************"
+    puts response.body.inspect
+
     if response.code.to_i == 201 || response.code.to_i == 200
         erb :review, locals: JSON.parse(response.body)
     else
@@ -45,18 +60,17 @@ end
 
 post '/auth' do
     # Update Checkout Session
+    puts "* auth *****************"
+    puts params.inspect
+
     response = client.api_call("checkoutSessions/#{params['amazonCheckoutSessionId']}", 'PATCH',
         payload: {
             webCheckoutDetails: {
                 checkoutResultReturnUrl: 'http://localhost:4567/thanks'
             },
             paymentDetails: {
-                paymentIntent: 'Authorize',
-                canHandlePendingAuthorization: false,
-                chargeAmount: {
-                    amount: '29980',
-                    currencyCode: "JPY"
-                }
+                paymentIntent: 'Confirm',
+                canHandlePendingAuthorization: false
             },
             merchantMetadata: {
                 merchantReferenceId: "MY-ORDER-100",
@@ -69,6 +83,10 @@ post '/auth' do
             'x-amz-pay-idempotency-key': SecureRandom.hex(10)
         }
     )
+
+    puts "******************"
+    puts "{\"status\": \"#{response.code.to_i}\", \"body\": \"#{response.body}\"}"
+
     if response.code.to_i == 201 || response.code.to_i == 200
         response.body
     else
@@ -78,14 +96,16 @@ end
 
 get '/thanks' do
     # Complete Checkout Session
+    puts "* thanks *****************"
+    puts params.inspect
+
     response = client.api_call("checkoutSessions/#{params['amazonCheckoutSessionId']}/complete", 'POST',
-        payload: {
-            chargeAmount: {
-                amount: '29980',
-                currencyCode: "JPY"
-            }
-        }
+        payload: {}
     )
+
+    puts "******************"
+    puts "{\"status\": \"#{response.code.to_i}\", \"body\": \"#{response.body}\"}"
+
     if response.code.to_i == 201 || response.code.to_i == 200
         erb :thanks
     else
