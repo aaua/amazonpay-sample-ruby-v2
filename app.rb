@@ -47,6 +47,10 @@ get '/review' do
     puts "* review *****************"
     puts params.inspect
     response = client.api_call("checkoutSessions/#{params['amazonCheckoutSessionId']}", 'GET')
+
+    puts "* review GET checkoutSessions *****************"
+    puts response.body.inspect
+
     if response.code.to_i == 201 || response.code.to_i == 200
         erb :review, locals: JSON.parse(response.body)
     else
